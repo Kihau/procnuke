@@ -292,7 +292,7 @@ pub fn full_name_matching(pid: ProcessID, pattern: &String) -> bool {
         );
         // println!("DEBUG: bytes read: {bytes_read}");
         let command_line = String::from_utf16_lossy(&buffer[..]);
-        println!("{command_line}");
+        // println!("{command_line}");
 
         if command_line.contains(pattern.to_lowercase().as_str()) {
             CloseHandle(process);
