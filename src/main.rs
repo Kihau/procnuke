@@ -7,8 +7,8 @@ use procnuke::windows::*;
 use procnuke::linux::*;
 
 // TODO: Change some logic
-//       Add "-a" flag to enable agressive matching (matching by process name and arguments)
-//       By default only match by processe name
+//       Add "-a" flag to enable aggressive matching (matching by process name and arguments)
+//       By default only match by process name
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() == 1 {
@@ -22,7 +22,7 @@ fn main() {
         kill_string.push_str(&args[i]);
     }
 
-    let pids = get_matching_pids_name(&kill_string);
-    // let pids = get_matching_pids_full(&kill_string);
+    // let pids = get_matching_pids_name(&kill_string);
+    let pids = get_matching_pids_full(&kill_string);
     kill_processes(pids);
 }
