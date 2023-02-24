@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use procnuke::*;
 
 #[cfg(target_os = "windows")]
@@ -6,23 +8,55 @@ use procnuke::windows::*;
 #[cfg(target_os = "linux")]
 use procnuke::linux::*;
 
-// TODO: Change some logic
-//       Add "-a" flag to enable aggressive matching (matching by process name and arguments)
-//       By default only match by process name
+fn print_help(program_name: &String) {
+    println!("ProcNuke (also known as fuckoff): Simple process killer.");
+    println!();
+    println!("Usage:");
+    println!("    {program_name} -a [program name]");
+    println!("    {program_name} [program name]");
+    println!();
+    println!("Options:");
+    println!("    -a, --aggressive    Aggressive mode. Matches processes by their name and execution arguments");
+    println!("    -h, --help          Display this prompt");
+}
+
+fn get_program_name(program_path: String) -> Option<String> {
+    let path = Path::new(&program_path);
+    let os_name = path.file_name()?.to_str()?;
+    return Some(String::from(os_name));
+}
+
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() == 1 {
-        eprintln!("You must provide a process name to kill");
+    let mut args = std::env::args();
+    let program_path = args.next().unwrap();
+    let program_name = get_program_name(program_path).unwrap();
+
+    let cmdline_args: Vec<String> = args.collect();
+    let mut aggressive = false;
+
+    let mut kill_string = String::new();
+
+    for arg in cmdline_args {
+        match arg.as_str() {
+            "-a" | "--aggressive" => aggressive = true,
+            "-h" | "--help" => {
+                print_help(&program_name);
+                return;
+            }
+            _ => kill_string.push_str(&arg),
+        }
+    }
+
+    if kill_string.is_empty() {
+        eprintln!("You must provide a process name to kill. Use {program_name} --help for more info.");
         return;
     }
 
-    let mut kill_string = String::new();
-    // Skip the first argument (the program name)
-    for i in 1..args.len() {
-        kill_string.push_str(&args[i]);
-    }
+    let pids = if aggressive {
+        get_matching_pids_full(&kill_string)
+    } else {
+        get_matching_pids_name(&kill_string)
+    };
 
-    // let pids = get_matching_pids_name(&kill_string);
-    let pids = get_matching_pids_full(&kill_string);
     kill_processes(pids);
 }
