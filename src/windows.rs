@@ -162,17 +162,17 @@ extern "system" {
     fn LoadLibraryA(lpLibFileName: LPCSTR) -> HMODULE;
 }
 
-#[link(name = "ntdll")]
-extern "system" {
-    // Requires PROCESS_QUERY_INFORMATION and PROCESS_VM_READ process access right
-    // fn NtQueryInformationProcess(
-    //     ProcessHandle: HANDLE, 
-    //     ProcessInformationClass: PROCESSINFOCLASS,
-    //     ProcessInformation: PVOID, 
-    //     ProcessInformationLength: ULONG,
-    //     ReturnLength: PULONG
-    // ) -> NTSTATUS;
-}
+// #[link(name = "ntdll")]
+// extern "system" {
+//     // Requires PROCESS_QUERY_INFORMATION and PROCESS_VM_READ process access right
+//     // fn NtQueryInformationProcess(
+//     //     ProcessHandle: HANDLE, 
+//     //     ProcessInformationClass: PROCESSINFOCLASS,
+//     //     ProcessInformation: PVOID, 
+//     //     ProcessInformationLength: ULONG,
+//     //     ReturnLength: PULONG
+//     // ) -> NTSTATUS;
+// }
 
 pub fn get_all_process_ids() -> Vec<ProcessID> {
     let mut all_pids = Vec::<ProcessID>::new();
@@ -291,7 +291,7 @@ pub fn full_name_matching(pid: ProcessID, pattern: &String) -> bool {
             rtl_data.CommandLine.Length as u64, &mut bytes_read as *mut u32 as *mut SIZE_T
         );
         // println!("DEBUG: bytes read: {bytes_read}");
-        let command_line = String::from_utf16_lossy(&buffer[..]);
+        let command_line = String::from_utf16_lossy(&buffer[..]).to_lowercase();
         // println!("{command_line}");
 
         if command_line.contains(pattern.to_lowercase().as_str()) {

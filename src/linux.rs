@@ -47,7 +47,7 @@ pub fn full_name_matching(process_id: ProcessID, pattern: &String) -> bool {
     if cmdline.is_err() {
         return false;
     }
-    let full_name = cmdline.unwrap();
+    let full_name = cmdline.unwrap().to_lowercase();
 
     if full_name.contains(pattern.to_lowercase().as_str()) {
         return true;
@@ -66,8 +66,8 @@ pub fn program_name_matching(process_id: ProcessID, pattern: &String) -> bool {
     }
     let status = status.unwrap();
 
-    let mut input = status.lines();
-    let name = input.next().unwrap().split("\t").skip(1).next().unwrap();
+    let input: Vec<&str> = status.lines().collect();
+    let name = input[0].split("\t").nth(1).unwrap().to_lowercase();
 
     if name.contains(pattern.to_lowercase().as_str()) {
         return true;

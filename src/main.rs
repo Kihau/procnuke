@@ -12,7 +12,7 @@ fn print_help(program_name: &String) {
     println!("ProcNuke (also known as fuckoff): Simple process killer.");
     println!();
     println!("Usage:");
-    println!("    {program_name} -a [program name]");
+    println!("    {program_name} -a [string to match against]");
     println!("    {program_name} [program name]");
     println!();
     println!("Options:");
@@ -25,6 +25,12 @@ fn get_program_name(program_path: String) -> Option<String> {
     let os_name = path.file_name()?.to_str()?;
     return Some(String::from(os_name));
 }
+
+// TODO: Add more options:
+//           -s, --case-sensitice     case sensitive
+//           -l, --list               list processes with pids, don't kill anything
+//           -p, --pid                kill by pid
+//           -os, --operating-system  shutdown operating system (requested by frisk)
 
 fn main() {
     let mut args = std::env::args();

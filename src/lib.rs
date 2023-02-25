@@ -18,6 +18,9 @@ pub fn get_matching_pids_name(pattern: &String) -> Vec<ProcessID> {
 
     let mut matched_pids = Vec::new();
     for pid in all_pids {
+        // Return process name instead of bool, allows for more extensibility, if I want to expand
+        // on this program
+        //                                vvvvvvvvvvvvvvvvvvvvv
         if pid != 0 && pid != self_pid && program_name_matching(pid, &pattern) {
             matched_pids.push(pid);
         }
@@ -34,6 +37,9 @@ pub fn get_matching_pids_full(pattern: &String) -> Vec<ProcessID> {
 
     let mut matched_pids = Vec::new();
     for pid in all_pids {
+        // Return full commandline name instead of bool, allows for more extensibility, if I want to expand
+        // on this program
+        //                                vvvvvvvvvvvvvvvvvv
         if pid != 0 && pid != self_pid && full_name_matching(pid, &pattern) {
             matched_pids.push(pid);
         }
