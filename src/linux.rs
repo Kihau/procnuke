@@ -39,6 +39,35 @@ pub fn get_all_process_ids() -> Vec<ProcessID> {
     return all_pids;
 }
 
+pub fn get_process_name(process_id: ProcessID) -> Option<String> {
+    let status_string = format!("/proc/{process_id}/status");
+    let status_path = Path::new(&status_string);
+    let status = read_to_string(status_path);
+
+    if status.is_err() {
+        return None;
+    }
+    let status = status.unwrap();
+
+    let input: Vec<&str> = status.lines().collect();
+    let name = input.get(0)?.split("\t").nth(1)?.to_string();
+
+    return Some(name);
+}
+
+pub fn get_process_cmdline(process_id: ProcessID) -> Option<String> {
+    let cmdline_string = format!("/proc/{process_id}/cmdline");
+    let cmdline_path = Path::new(&cmdline_string);
+    let cmdline = read_to_string(cmdline_path);
+
+    if cmdline.is_err() {
+        return None;
+    }
+    let cmdline = cmdline.unwrap();
+    return Some(cmdline);
+}
+
+// change this or something
 pub fn full_name_matching(process_id: ProcessID, pattern: &String) -> bool {
     let cmdline_string = format!("/proc/{process_id}/cmdline");
     let cmdline_path = Path::new(&cmdline_string);
@@ -76,13 +105,17 @@ pub fn program_name_matching(process_id: ProcessID, pattern: &String) -> bool {
     return false;
 }
 
-pub fn kill_processes(pids: Vec<ProcessID>) {
-    for pid in pids {
-        println!("Killing process: {pid}");
-        unsafe {
-            kill(pid, SIGKILL);
-        }
+pub fn kill_process(process_id: ProcessID) {
+    unsafe {
+        kill(process_id, SIGKILL);
     }
 }
 
-
+// pub fn kill_processes(pids: Vec<ProcessID>) {
+//     for pid in pids {
+//         println!("Killing process: {pid}");
+//         unsafe {
+//             kill(pid, SIGKILL);
+//         }
+//     }
+// }

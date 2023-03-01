@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, num::IntErrorKind};
 
 use procnuke::*;
 
@@ -8,18 +8,6 @@ use procnuke::windows::*;
 #[cfg(target_os = "linux")]
 use procnuke::linux::*;
 
-fn print_help(program_name: &String) {
-    println!("ProcNuke (also known as fuckoff): Simple process killer.");
-    println!();
-    println!("Usage:");
-    println!("    {program_name} -a [string to match against]");
-    println!("    {program_name} [program name]");
-    println!();
-    println!("Options:");
-    println!("    -a, --aggressive    Aggressive mode. Matches processes by their name and execution arguments");
-    println!("    -h, --help          Display this prompt");
-}
-
 fn get_program_name(program_path: String) -> Option<String> {
     let path = Path::new(&program_path);
     let os_name = path.file_name()?.to_str()?;
@@ -27,42 +15,66 @@ fn get_program_name(program_path: String) -> Option<String> {
 }
 
 // TODO: Add more options:
-//           -s, --case-sensitice     case sensitive
-//           -l, --list               list processes with pids, don't kill anything
-//           -p, --pid                kill by pid
 //           -os, --operating-system  shutdown operating system (requested by frisk)
 
 fn main() {
     let mut args = std::env::args();
-    let program_path = args.next().unwrap();
-    let program_name = get_program_name(program_path).unwrap();
+    let exec_path = args.next().unwrap();
+    let exec_name = get_program_name(exec_path).unwrap();
 
     let cmdline_args: Vec<String> = args.collect();
-    let mut aggressive = false;
+    let mut config = Config::default();
 
-    let mut kill_string = String::new();
+    let mut kill_args = Vec::new();
 
     for arg in cmdline_args {
         match arg.as_str() {
-            "-a" | "--aggressive" => aggressive = true,
-            "-h" | "--help" => {
-                print_help(&program_name);
-                return;
-            }
-            _ => kill_string.push_str(&arg),
+            "-c" | "--cmdline"        => config.match_cmdline = true,
+            "-s" | "--case-sensitive" => config.case_sensitive = true,
+            "-e" | "--exact"          => config.match_exact = true,
+            "-l" | "--list"           => config.listing = true,
+            "-p" | "--pid"            => config.match_pid = true,
+            "-v" | "--version"        => print_version(),
+            "-h" | "--help"           => print_help(&exec_name),
+            _                         => kill_args.push(arg),
         }
     }
 
-    if kill_string.is_empty() {
-        eprintln!("You must provide a process name to kill. Use {program_name} --help for more info.");
+    // Handle some error cases
+    let mut error_occurred = true;
+    match config {
+        Config { match_pid: true, match_cmdline: true, .. } => 
+            eprintln!("ERROR: Option for matching by PID cannot be used with option for command line matching"),
+        Config { match_pid: true, match_exact: true, .. } =>
+            eprintln!("ERROR: Option for matching by PID cannot be used with option for exact string matching"),
+        Config { match_pid: true, .. } if kill_args.is_empty() && !config.listing =>
+            eprintln!("ERROR: You must provide one or more process ids to kill. Use {exec_name} --help for more info."),
+        _ if kill_args.is_empty() && !config.listing  => print_help(&exec_name),
+            // eprintln!("ERROR: You must provide a process name to kill. Use {exec_name} --help for more info."),
+        _ => error_occurred = false,
+    }
+
+    if error_occurred {
         return;
     }
 
-    let pids = if aggressive {
-        get_matching_pids_full(&kill_string)
+    let mut pids = if !config.match_pid {
+        get_matching_by_string(&config, &kill_args)
     } else {
-        get_matching_pids_name(&kill_string)
+        get_matching_by_pid(&kill_args)
     };
 
-    kill_processes(pids);
+    if !config.listing {
+        if pids.len() == 0 {
+            println!("No matching processes found.");
+            return;
+        }
+
+        kill_processes(pids);
+    } else {
+        if pids.len() == 0 && kill_args.is_empty(){
+            pids = get_all_process_ids();
+        }
+        list_processes(pids);
+    }
 }
