@@ -332,7 +332,6 @@ pub fn program_name_matching(pid: ProcessID, pattern: &String) -> bool {
 }
 
 
-// what the fuck
 pub fn full_name_matching(pid: ProcessID, pattern: &String) -> bool {
     unsafe {
         let ntdll = CString::new("ntdll.dll").unwrap();

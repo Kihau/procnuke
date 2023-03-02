@@ -1,4 +1,4 @@
-use std::{path::Path, num::IntErrorKind};
+use std::{path::Path};
 
 use procnuke::*;
 
@@ -14,9 +14,6 @@ fn get_program_name(program_path: String) -> Option<String> {
     return Some(String::from(os_name));
 }
 
-// TODO: Add more options:
-//           -os, --operating-system  shutdown operating system (requested by frisk)
-
 fn main() {
     let mut args = std::env::args();
     let exec_path = args.next().unwrap();
@@ -27,16 +24,30 @@ fn main() {
 
     let mut kill_args = Vec::new();
 
+    if cmdline_args.is_empty() {
+        print_help(&exec_name);
+    }
+
     for arg in cmdline_args {
         match arg.as_str() {
-            "-c" | "--cmdline"        => config.match_cmdline = true,
-            "-s" | "--case-sensitive" => config.case_sensitive = true,
-            "-e" | "--exact"          => config.match_exact = true,
-            "-l" | "--list"           => config.listing = true,
-            "-p" | "--pid"            => config.match_pid = true,
-            "-v" | "--version"        => print_version(),
-            "-h" | "--help"           => print_help(&exec_name),
-            _                         => kill_args.push(arg),
+            "-c" | "--cmdline"             => config.match_cmdline = true,
+            "-s" | "--case-sensitive"      => config.case_sensitive = true,
+            "-e" | "--exact"               => config.match_exact = true,
+            "-l" | "--list"                => config.listing = true,
+            "-p" | "--pid"                 => config.match_pid = true,
+            "-i" | "--ignore-unrecognised" => config.ignore_unrecognised = true,
+            "-v" | "--version"             => print_version(),
+            "-h" | "--help"                => print_help(&exec_name),
+            _                              => kill_args.push(arg),
+        }
+    }
+
+    if !config.ignore_unrecognised {
+        for arg in &kill_args {
+            if arg.starts_with('-') {
+                eprintln!("ERROR: Unrecognised option '{arg}'. Use {exec_name} --help to list available options.");
+                return;
+            }
         }
     }
 
@@ -49,8 +60,8 @@ fn main() {
             eprintln!("ERROR: Option for matching by PID cannot be used with option for exact string matching"),
         Config { match_pid: true, .. } if kill_args.is_empty() && !config.listing =>
             eprintln!("ERROR: You must provide one or more process ids to kill. Use {exec_name} --help for more info."),
-        _ if kill_args.is_empty() && !config.listing  => print_help(&exec_name),
-            // eprintln!("ERROR: You must provide a process name to kill. Use {exec_name} --help for more info."),
+        _ if kill_args.is_empty() && !config.listing  => /* print_help(&exec_name), */
+            eprintln!("ERROR: You must provide a process name to kill. Use {exec_name} --help for more info."),
         _ => error_occurred = false,
     }
 

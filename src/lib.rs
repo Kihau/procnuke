@@ -10,6 +10,8 @@ pub mod linux;
 pub mod windows;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
+pub const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 
 pub struct Config {
     pub case_sensitive: bool,
@@ -17,7 +19,7 @@ pub struct Config {
     pub match_exact: bool,
     pub match_pid: bool,
     pub listing: bool,
-
+    pub ignore_unrecognised: bool,
 }
 
 impl Default for Config {
@@ -28,30 +30,37 @@ impl Default for Config {
             match_exact: false,
             match_pid: false,
             listing: false,
+            ignore_unrecognised: false,
         }
     }
 }
 
 pub fn print_help(program_name: &String) {
-    println!("ProcNuke v{VERSION} (also known as fuckoff): Simple process killer.");
+    println!("ProcNuke (also known as fuckoff): Simple process killer.");
     println!();
-    println!("Usage:");
-    println!("    {program_name} -a [string to match against]");
+    println!("Example usage:");
     println!("    {program_name} [program name]");
-    println!("    TODO: Add some more");
+    println!("    {program_name} -c [string to match against]");
+    println!("    {program_name} -p [process id]");
+    println!("    {program_name} -c [string to match] --list");
+    println!("    {program_name} [program name] --exact -s");
     println!();
     println!("Options:");
-    println!("    -c, --cmdline           Matches processes by their name AND their execution arguments");
-    println!("    -s, --case-sensitive    Don't ignore case when matching strings");
-    println!("    -e, --exact             Match exact string");
-    println!("    -l, --list              List processes");
-    println!("    -p, --pid               Find/Kill process by pid");
-    println!("    -h, --help              Display this prompt");
+    println!("    -c, --cmdline                Matches processes by their name AND their execution arguments");
+    println!("    -s, --case-sensitive         Don't ignore case when matching strings");
+    println!("    -e, --exact                  Match exact string");
+    println!("    -p, --pid                    Match process by their process IDs");
+    println!("    -l, --list                   List processes (can be used with other matching options)");
+    println!("    -i, --ignore-unrecognised    Ignore unrecognised command line options and treat them as regular input arguments");
+    println!("    -v, --version                Display version number and other information");
+    println!("    -h, --help                   Display this prompt");
     std::process::exit(0);
 }
 
 pub fn print_version() {
     println!("Version: ProcNuke-v{VERSION}");
+    println!("Author: {AUTHORS}");
+    println!("Source:  {REPOSITORY}");
     std::process::exit(0);
 }
 
