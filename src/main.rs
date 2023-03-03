@@ -38,6 +38,7 @@ fn main() {
             "-i" | "--ignore-unrecognised" => config.ignore_unrecognised = true,
             "-v" | "--version"             => print_version(),
             "-h" | "--help"                => print_help(&exec_name),
+            // TODO: -j, --join - join the string together and dont treat is as separate arguments
             _                              => kill_args.push(arg),
         }
     }

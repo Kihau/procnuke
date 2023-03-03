@@ -105,7 +105,6 @@ pub fn get_matching_by_string(config: &Config, kill_args: &Vec<String>) -> Vec<P
     println!("Self pid is {self_pid}");
 
     let all_pids = get_all_process_ids();
-    let mut kill_string = kill_args.join(" ");
     for pid in all_pids {
         if pid == self_pid {
             continue;
@@ -121,21 +120,23 @@ pub fn get_matching_by_string(config: &Config, kill_args: &Vec<String>) -> Vec<P
             continue;
         };
 
-        if !config.case_sensitive {
-            process_string = process_string.to_lowercase();
-            kill_string = kill_string.to_lowercase();
+        for arg in kill_args {
+            let mut kill_string = String::from(arg);
+            if !config.case_sensitive {
+                process_string = process_string.to_lowercase();
+                kill_string = kill_string.to_lowercase();
+            }
+
+            let string_matching = if config.match_exact {
+                kill_string == process_string
+            } else {
+                process_string.contains(&kill_string)
+            };
+
+            if string_matching {
+                matched_pids.push(pid);
+            }
         }
-
-        let string_matching = if config.match_exact {
-            kill_string == process_string
-        } else {
-            process_string.contains(&kill_string)
-        };
-
-        if string_matching {
-            matched_pids.push(pid);
-        }
-
     }
 
     return matched_pids;
