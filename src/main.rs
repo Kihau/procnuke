@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use std::{path::Path};
 
 use procnuke::*;
@@ -5,16 +7,28 @@ use procnuke::*;
 #[cfg(target_os = "windows")]
 use procnuke::windows::*;
 
+#[cfg(target_os = "windows")]
+use procnuke::winapi_bindings::*;
+
 #[cfg(target_os = "linux")]
 use procnuke::linux::*;
 
 fn get_program_name(program_path: String) -> Option<String> {
     let path = Path::new(&program_path);
     let os_name = path.file_name()?.to_str()?;
-    return Some(String::from(os_name));
+    Some(String::from(os_name))
 }
 
+// TODO: Manifest + program icon file for windows
+// TODO: Desktop entry for linux
+// TODO: MaxOS Support
+// TODO(maybe): Popup menu propmt 
+// TODO: -j, --join - join the string together and dont treat is as separate arguments
+
 fn main() {
+    #[cfg(target_os = "windows")]
+    unsafe { AttachConsole(ATTACH_PARENT_PROCESS); }
+
     let mut args = std::env::args();
     let exec_path = args.next().unwrap();
     let exec_name = get_program_name(exec_path).unwrap();
@@ -38,7 +52,6 @@ fn main() {
             "-i" | "--ignore-unrecognised" => config.ignore_unrecognised = true,
             "-v" | "--version"             => print_version(),
             "-h" | "--help"                => print_help(&exec_name),
-            // TODO: -j, --join - join the string together and dont treat is as separate arguments
             _                              => kill_args.push(arg),
         }
     }
@@ -77,16 +90,19 @@ fn main() {
     };
 
     if !config.listing {
-        if pids.len() == 0 {
-            println!("No matching processes found.");
+        if pids.is_empty() {
+            eprintln!("No matching processes found.");
             return;
         }
 
         kill_processes(pids);
     } else {
-        if pids.len() == 0 && kill_args.is_empty(){
+        if pids.is_empty() && kill_args.is_empty(){
             pids = get_all_process_ids();
         }
         list_processes(pids);
     }
+
+    #[cfg(target_os = "windows")]
+    unsafe { FreeConsole(); }
 }

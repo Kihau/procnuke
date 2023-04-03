@@ -9,10 +9,15 @@ pub mod linux;
 #[cfg(target_os = "windows")]
 pub mod windows;
 
+#[cfg(target_os = "windows")]
+pub mod winapi_bindings;
+
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 pub const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 
+// Shouldnt be part of the lib?
+#[derive(Default)]
 pub struct Config {
     pub case_sensitive: bool,
     pub match_cmdline: bool,
@@ -20,19 +25,6 @@ pub struct Config {
     pub match_pid: bool,
     pub listing: bool,
     pub ignore_unrecognised: bool,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            match_cmdline: false,
-            case_sensitive: false,
-            match_exact: false,
-            match_pid: false,
-            listing: false,
-            ignore_unrecognised: false,
-        }
-    }
 }
 
 pub fn print_help(program_name: &String) {
@@ -59,7 +51,7 @@ pub fn print_help(program_name: &String) {
 
 pub fn print_version() {
     println!("Version: ProcNuke-v{VERSION}");
-    println!("Author: {AUTHORS}");
+    println!("Author:  {AUTHORS}");
     println!("Source:  {REPOSITORY}");
     std::process::exit(0);
 }
@@ -95,7 +87,7 @@ pub fn get_matching_by_pid(kill_args: &Vec<String>) -> Vec<ProcessID> {
         }
     }
 
-    return matched_pids;
+    matched_pids
 }
 
 pub fn get_matching_by_string(config: &Config, kill_args: &Vec<String>) -> Vec<ProcessID> {
@@ -139,7 +131,7 @@ pub fn get_matching_by_string(config: &Config, kill_args: &Vec<String>) -> Vec<P
         }
     }
 
-    return matched_pids;
+    matched_pids
 }
 
 pub fn kill_processes(pids: Vec<ProcessID>) {
@@ -151,43 +143,4 @@ pub fn kill_processes(pids: Vec<ProcessID>) {
         }
         kill_process(pid);
     }
-}
-
-
-/// Retrieves process ID's by matching the process program name with provided pattern
-pub fn get_matching_pids_name(pattern: &String) -> Vec<ProcessID> {
-    let all_pids = get_all_process_ids();
-
-    let self_pid = std::process::id();
-    println!("Self pid is {self_pid}");
-
-    let mut matched_pids = Vec::new();
-    for pid in all_pids {
-        // Return process name instead of bool, allows for more extensibility, if I want to expand
-        // on this program
-        //                                vvvvvvvvvvvvvvvvvvvvv
-        if pid != 0 && pid != self_pid && program_name_matching(pid, &pattern) {
-            matched_pids.push(pid);
-        }
-    }
-    return matched_pids;
-}
-
-/// Retrieves process ID's by matching process name and execution arguments with provided pattern
-pub fn get_matching_pids_full(pattern: &String) -> Vec<ProcessID> {
-    let all_pids = get_all_process_ids();
-
-    let self_pid = std::process::id();
-    println!("Self pid is {self_pid}");
-
-    let mut matched_pids = Vec::new();
-    for pid in all_pids {
-        // Return full commandline name instead of bool, allows for more extensibility, if I want to expand
-        // on this program
-        //                                vvvvvvvvvvvvvvvvvv
-        if pid != 0 && pid != self_pid && full_name_matching(pid, &pattern) {
-            matched_pids.push(pid);
-        }
-    }
-    return matched_pids;
 }
