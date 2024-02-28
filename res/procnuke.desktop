@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+TryExec=fo
+Exec=procnuke
+Icon=ProcNuke
+Terminal=true
+Categories=System;TerminalEmulator;
+
+Name=ProcNuke
+GenericName=Process Killer
+Comment=Simple and aggressive process killer
+Actions=New;

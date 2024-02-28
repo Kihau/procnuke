@@ -42,7 +42,7 @@ pub fn get_process_name(process_id: ProcessID) -> Option<String> {
             &mut bytes_required as LPDWORD
         ); 
 
-        if result == 0 {
+        if result == FALSE {
             CloseHandle(process);
             return None;
         }
@@ -140,13 +140,15 @@ pub fn get_process_cmdline(process_id: ProcessID) -> Option<String> {
     }
 }
 
-pub fn kill_process(process_id: ProcessID) {
+pub fn kill_process(process_id: ProcessID) -> bool {
     unsafe {
         let process = OpenProcess(PROCESS_TERMINATE, 0, process_id);
-        // Terminate is asynchronous, I might need to call WaitForSingleObject and check if
-        // termination completed successfully after the timeout
-        TerminateProcess(process, 0);
+
+        let result = TerminateProcess(process, 0);
         CloseHandle(process);
+
+        // WinApi states that the return value is non-zero if the function succeeded.
+        return result != 0;
     }
 }
 

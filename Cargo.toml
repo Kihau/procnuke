@@ -5,6 +5,12 @@ edition = "2021"
 authors = ["Kihau"]
 repository = "https://github.com/Kihau/procnuke"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# The general section with crate name, license, etc.
+# build = "build.rs"
 
 [dependencies]
+# libprocnuke = { path = "lib/libprocnuke" }
+
+# TODO:
+# [target.'cfg(target_os="windows")'.build-dependencies]
+# embed-resource = "1.4"

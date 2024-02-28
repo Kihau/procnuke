@@ -1,0 +1,5 @@
+// TODO: 
+//    Something like this?
+//    https://github.com/alacritty/alacritty/blob/master/alacritty/windows/alacritty.rc
+#define IDR_MAINFRAME 128
+IDR_MAINFRAME ICON "procnuke.ico"

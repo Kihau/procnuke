@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use std::{path::Path};
+use std::path::Path;
 
 use procnuke::*;
 
@@ -19,11 +19,13 @@ fn get_program_name(program_path: String) -> Option<String> {
     Some(String::from(os_name))
 }
 
+//
 // TODO: Manifest + program icon file for windows
-// TODO: Desktop entry for linux
+//
 // TODO: MaxOS Support
+//
 // TODO(maybe): Popup menu propmt 
-// TODO: -j, --join - join the string together and dont treat is as separate arguments
+//   -> TODO: Desktop entry for linux
 
 fn main() {
     #[cfg(target_os = "windows")]

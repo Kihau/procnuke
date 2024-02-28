@@ -134,13 +134,21 @@ pub fn get_matching_by_string(config: &Config, kill_args: &Vec<String>) -> Vec<P
     matched_pids
 }
 
+/// Returns true when the function succeeded and false when it failed.
 pub fn kill_processes(pids: Vec<ProcessID>) {
     for pid in pids {
-        if let Some(process_name) = get_process_name(pid) {
-            println!("Killing process: {pid} - {process_name}");
+        let success = kill_process(pid);
+
+        let process_name = if let Some(process_name) = get_process_name(pid) {
+            process_name
         } else {
-            println!("Killing process: {pid} - <Unavailable>");
+            "<Name Unavailable>".to_string()
+        };
+
+        if success {
+            println!("Process killed: {pid} - {process_name}");
+        } else {
+            eprintln!("Failed to kill process: {pid} - {process_name}");
         }
-        kill_process(pid);
     }
 }

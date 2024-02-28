@@ -127,6 +127,8 @@ pub const PROCESS_QUERY_INFORMATION: DWORD = 0x0400;
 pub const PROCESS_VM_READ: DWORD = 0x0010;
 pub const NULL: *mut void = 0 as *mut void;
 pub const ATTACH_PARENT_PROCESS: DWORD = 0xFFFFFFFF;
+pub const TRUE: BOOL = 1;
+pub const FALSE: BOOL = 0;
 
 #[link(name = "psapi")]
 extern "system" {

@@ -1,4 +1,4 @@
-use std::{path::{Path}, fs::{self, read_to_string}};
+use std::{path::Path, fs::{self, read_to_string}};
 
 pub type ProcessID = pid_t;
 
@@ -66,8 +66,12 @@ pub fn get_process_cmdline(process_id: ProcessID) -> Option<String> {
     Some(cmdline)
 }
 
-pub fn kill_process(process_id: ProcessID) {
+// pub fn kill_process(process_id: ProcessID) -> std::io::Result<()> {
+pub fn kill_process(process_id: ProcessID) -> bool {
     unsafe {
-        kill(process_id, SIGKILL);
+        let result = kill(process_id, SIGKILL);
+
+        // Unix manual states that the return value is zero if the function succeeded.
+        return result == 0;
     }
 }
